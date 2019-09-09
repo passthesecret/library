@@ -1,10 +1,11 @@
 import uuid
+import datetime
 
 
 class MemoryDB(object):
     secret_table = {}
 
-    def create_secret_entry(self, secret_data, wipe_data, expiration, consumable):
+    def create_secret_entry(self, secret_data, wipe_data, expire_in_seconds, is_consumable):
         # Prevent duplicate entries:
         #    MemoryDB - Have to check if key exists first
         #    DynamoDB - Use put_item's attribute_not_exists
@@ -17,15 +18,24 @@ class MemoryDB(object):
             secret_id = str(uuid.uuid4()).replace('-', '')
             if secret_id in self.secret_table:
                 continue
+            # MemoryDB stores the timestamp in the form of a date on which it expires.
+            expiration = (datetime.datetime.now() + datetime.timedelta(seconds=expire_in_seconds))
             self.secret_table[secret_id] = {
                 'id': secret_id,
                 'secret': secret_data,
                 'wipe': wipe_data,
                 'expiration': expiration.timestamp(),
-                'consumable': consumable
+                'consumable': is_consumable
 
             }
             return secret_id
 
     def retrieve_secret_entry(self, secret_id):
-        return self.secret_table[secret_id]
+        secret = self.secret_table[secret_id]
+        # TODO: Implement expiration, need to do string conversion
+        #if (datetime.datetime.now() > secret[''])
+        return secret
+
+    def destroy_secret_entry(self, secret_id):
+        # TODO: Some better error checking here and informative response
+        del self.secret_table[secret_id]
