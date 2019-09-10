@@ -1,6 +1,7 @@
 from cryptography.fernet import Fernet, InvalidToken
 import os
 import uuid
+from uuid import UUID
 
 class Manager(object):
 
@@ -36,8 +37,17 @@ class Manager(object):
             # Figure out how to articulate errors later
             raise ValueError('Malformed Request String')
         secret_id = request_string[:32]
+        try:
+            UUID(secret_id, version=4)
+        except ValueError:
+            # Not a valid UUID
+            raise ValueError('Malformed Request String')
         encryption_key = request_string[32:]
-        decrypt_f = Fernet(encryption_key)
+        try:
+            decrypt_f = Fernet(encryption_key)
+        except ValueError:
+            # Not a valid Fernet Key
+            raise ValueError('Malformed Request String')
         secret_entry = self.database.retrieve_secret_entry(secret_id)
         # We're ALWAYS going to need to decrypt this one
         secret_entry['secret'] = secret_entry['secret'].encode('UTF-8')
@@ -64,7 +74,7 @@ class Manager(object):
                     return {'secret': plaintext.decode('UTF-8')}
         # If decrypting secret with user-provided key is unsuccessful then attempt to decrypt wipe field
         try:
-            plaintext = decrypt_f.decrypt(secret_entry['wipe'].encode['UTF-8'])
+            plaintext = decrypt_f.decrypt(secret_entry['wipe'].encode('UTF-8'))
         except InvalidToken:
             # If decrypting wipe with user-provided key is unsuccessful then return not found.
             raise LookupError('Not Found')
