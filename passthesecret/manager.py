@@ -1,10 +1,10 @@
-from cryptography.fernet import Fernet, InvalidToken
-import os
 import uuid
 from uuid import UUID
 
-class Manager(object):
+from cryptography.fernet import Fernet, InvalidToken
 
+
+class Manager(object):
     database = None
 
     def __init__(self, database):

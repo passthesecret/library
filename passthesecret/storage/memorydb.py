@@ -1,5 +1,5 @@
-import uuid
 import datetime
+import uuid
 
 
 class MemoryDB(object):

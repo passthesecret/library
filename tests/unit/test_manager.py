@@ -1,22 +1,22 @@
 import unittest
+
 from passthesecret.manager import Manager
 from passthesecret.storage.memorydb import MemoryDB
-from passthesecret.storage.dynamodb import DynamoDB
 
 
 class TestManager(unittest.TestCase):
 
     def test_create_secret(self):
-        manager = Manager(DynamoDB())
+        manager = Manager(MemoryDB())
         plaintext = 'Lorem ipsum dolor sit amet'
-        create_response = manager.create_secret(plaintext, 86400, False)
+        create_response = manager.create_secret(plaintext, 3600, False)
         self.assertEqual(len(create_response['secret_request_string']), 76, 'Secret Request String Not 76 Characters')
         self.assertEqual(len(create_response['wipe_request_string']), 76, 'Wipe Request String Not 76 Characters')
 
     def test_get_secret(self):
-        manager = Manager(DynamoDB())
+        manager = Manager(MemoryDB())
         plaintext = 'Lorem ipsum dolor sit amet'
-        create_response = manager.create_secret(plaintext, 86400, False)
+        create_response = manager.create_secret(plaintext, 3600, False)
         get_response = manager.get_secret(create_response['secret_request_string'])
         # Test Secret Matches
         self.assertEqual(get_response['secret'], plaintext, 'Retrieved Secret Does Not Match Stored Secret')
@@ -39,9 +39,9 @@ class TestManager(unittest.TestCase):
                          'Invalid Secret Request String (Invalid Fernet Key) Does Not Raise Error')
 
     def test_get_consumable_secret(self):
-        manager = Manager(DynamoDB())
+        manager = Manager(MemoryDB())
         plaintext = 'Lorem ipsum dolor sit amet'
-        create_response = manager.create_secret(plaintext, 86400, True)
+        create_response = manager.create_secret(plaintext, 3600, True)
         get_response = manager.get_secret(create_response['secret_request_string'])
         self.assertEqual(get_response['secret'], plaintext)
         with self.assertRaises(LookupError):

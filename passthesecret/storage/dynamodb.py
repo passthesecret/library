@@ -1,12 +1,14 @@
-import uuid
 import datetime
+import os
+import uuid
+
 import boto3
 from botocore.exceptions import ClientError
-import os
 
 
 class DynamoDB(object):
-    client = boto3.client('dynamodb')
+    client = boto3.resource('dynamodb')
+    table = client.Table(os.environ['PTS_DDB_SECRET_TABLE'])
 
     def create_secret_entry(self, secret_data, wipe_data, expire_in_seconds, is_consumable):
         # See MemoryDB implementation for extended explanation
@@ -15,14 +17,13 @@ class DynamoDB(object):
             # MemoryDB stores the timestamp in the form of a date on which it expires.
             expiration = (datetime.datetime.now() + datetime.timedelta(seconds=expire_in_seconds))
             try:
-                response = self.client.put_item(
-                    TableName=os.environ['PTS_DDB_SECRET_TABLE'],
+                response = self.table.put_item(
                     Item={
-                        'id': {'S': secret_id},
-                        'secret': {'S': secret_data},
-                        'wipe': {'S': wipe_data},
-                        'expiration': {'N': str(int(expiration.timestamp()))},
-                        'consumable': {'BOOL': is_consumable}
+                        'id': secret_id,
+                        'secret': secret_data,
+                        'wipe': wipe_data,
+                        'expiration': int(expiration.timestamp()),
+                        'consumable': is_consumable
                     },
                     ConditionExpression='attribute_not_exists(id)'
                 )
@@ -31,25 +32,16 @@ class DynamoDB(object):
                 if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
                     continue
 
-
-
     def retrieve_secret_entry(self, secret_id):
         # See MemoryDB implementation for extended explanation
-        response = self.client.get_item(
-            TableName=os.environ['PTS_DDB_SECRET_TABLE'],
+        response = self.table.get_item(
             Key={
-                'id': {'S': secret_id}
+                'id': secret_id
             }
         )
         if 'Item' in response:
             # The secret exists to retrieve it
-            secret = {
-                'id': response['Item']['id']['S'],
-                'secret': response['Item']['secret']['S'],
-                'wipe': response['Item']['wipe']['S'],
-                'expiration': int(response['Item']['expiration']['N']),
-                'consumable': response['Item']['consumable']['BOOL'],
-            }
+            secret = response['Item']
         else:
             # The secret doesn't exist so create a dummy one
             secret = {
@@ -76,10 +68,9 @@ class DynamoDB(object):
         return secret
 
     def destroy_secret_entry(self, secret_id):
-        response = self.client.delete_item(
-            TableName=os.environ['PTS_DDB_SECRET_TABLE'],
+        response = self.table.delete_item(
             Key={
-                'id': {'S': secret_id}
+                'id': secret_id
             },
             # Unfortunately we have to retrieve the record to verify deletion. If this is omitted delete_item() does
             # not give any indication that and item was deleted. With ReturnValues ALL_OLD the response contains the
