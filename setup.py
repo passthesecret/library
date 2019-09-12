@@ -10,7 +10,7 @@ if os.environ['CI_COMMIT_TAG']:
         version_from_tag = os.environ['CI_COMMIT_TAG']
 
 setuptools.setup(
-    name="passthesecret-core",
+    name="ptscore",
     version=version_from_tag,
     author="Caesar Kabalan",
     author_email="caesar.kabalan@gmail.com",
