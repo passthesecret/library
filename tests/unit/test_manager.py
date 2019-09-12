@@ -1,7 +1,7 @@
 import unittest
 
-from passthesecret.manager import Manager
-from passthesecret.storage.memorydb import MemoryDB
+from ptscore.manager import Manager
+from ptscore.storage.memorydb import MemoryDB
 
 
 class TestManager(unittest.TestCase):
