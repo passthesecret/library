@@ -6,7 +6,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="ptscore",
-    version=0.1.6,
+    version="0.1.7",
     author="Caesar Kabalan",
     author_email="caesar.kabalan@gmail.com",
     description="PassTheSecret core library containing back-end code for encryption and storage of secrets.",
