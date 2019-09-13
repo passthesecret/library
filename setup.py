@@ -25,4 +25,18 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7',
+    install_requires=[
+        'asn1crypto==0.24.0',
+        'boto3==1.9.225',
+        'botocore==1.12.225',
+        'cffi==1.12.3',
+        'cryptography==2.7',
+        'docutils==0.15.2',
+        'jmespath==0.9.4',
+        'pycparser==2.19',
+        'python-dateutil==2.8.0',
+        's3transfer==0.2.1',
+        'six==1.12.0',
+        'urllib3==1.25.3'
+    ]
 )
