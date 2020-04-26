@@ -4,19 +4,28 @@ default:
   image: passthesecret/ci-build-environment:latest
 
 stages:
+  - build
   - test
   - deploy
+
+build:
+  stage: build
+  script:
+  - pip install --upgrade pip
+  - pip install poetry
+  - poetry --version
+  - poetry install -vv
+  - poetry export --format requirements.txt --without-hashes --output requirements.txt
 
 test:
   stage: test
   script:
-  - python3 -m pip install -r requirements.txt
   - python3 -m unittest discover -s tests --verbose
 
 production:
   stage: deploy
   script:
-  - python3 -m pip install twine
+  - poetry install -vv twine
   - python3 setup.py sdist
   - twine upload dist/*
   only:
