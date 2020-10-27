@@ -25,7 +25,7 @@ setuptools.setup(
         'boto3==1.9.225',
         'botocore==1.12.225',
         'cffi==1.12.3',
-        'cryptography==2.7',
+        'cryptography==3.2',
         'docutils==0.15.2',
         'jmespath==0.9.4',
         'pycparser==2.19',
